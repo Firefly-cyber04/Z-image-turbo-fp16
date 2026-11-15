@@ -1,0 +1,157 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "z_image_turbo_bf16.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_3_4b.safetensors",
+      "type": "lumina2",
+      "device": "default"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "一只柴犬坐在洒满午后阳光的木质窗台上，脖子上系着一条红色蝴蝶结领结，窗外是虚化的绿植与暖色天空，室内静谧，柔和的自然光，细腻的毛发质感，温暖的色调，写实摄影，高细节",
+      "clip": [
+        "2",
+        0
+      ]
+    }
+  },
+  "5": {
+    "class_type": "ConditioningZeroOut",
+    "inputs": {
+      "conditioning": [
+        "4",
+        0
+      ]
+    }
+  },
+  "6": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "zimage_demo_base.png",
+      "upload": "image"
+    }
+  },
+  "7": {
+    "class_type": "Canny",
+    "inputs": {
+      "low_threshold": 0.25,
+      "high_threshold": 0.6,
+      "image": [
+        "6",
+        0
+      ]
+    }
+  },
+  "8": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "9": {
+    "class_type": "ModelPatchLoader",
+    "inputs": {
+      "name": "Z-Image-Turbo-Fun-Controlnet-Union-2.1-8steps.safetensors"
+    }
+  },
+  "10": {
+    "class_type": "ZImageFunControlnet",
+    "inputs": {
+      "strength": 1.0,
+      "model": [
+        "1",
+        0
+      ],
+      "model_patch": [
+        "9",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ],
+      "image": [
+        "7",
+        0
+      ]
+    }
+  },
+  "11": {
+    "class_type": "ModelSamplingAuraFlow",
+    "inputs": {
+      "shift": 3.0,
+      "sampling": "flow",
+      "model": [
+        "10",
+        0
+      ]
+    }
+  },
+  "12": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 20261115,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "res_multistep",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": [
+        "11",
+        0
+      ],
+      "positive": [
+        "4",
+        0
+      ],
+      "negative": [
+        "5",
+        0
+      ],
+      "latent_image": [
+        "8",
+        0
+      ]
+    }
+  },
+  "13": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "12",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    }
+  },
+  "14": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "zimage_turbo_controlnet",
+      "images": [
+        "13",
+        0
+      ]
+    }
+  }
+}
